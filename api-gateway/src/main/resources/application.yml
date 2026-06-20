@@ -1,0 +1,58 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: rider-service
+          uri: http://rider-service:8081
+          predicates:
+            - Path=/api/rides/**
+
+        - id: driver-service
+          uri: http://driver-service:8082
+          predicates:
+            - Path=/api/drivers/**
+
+        - id: dispatch-service
+          uri: http://dispatch-service:8083
+          predicates:
+            - Path=/api/dispatch/**
+
+        - id: notification-service
+          uri: http://notification-service:8084
+          predicates:
+            - Path=/api/notifications/**
+
+      default-filters:
+        - AddResponseHeader=X-Gateway, RideHailing-Gateway
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,gateway
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.ridehailing: DEBUG
